@@ -6,7 +6,7 @@ use crm::pb::{
 use tonic::transport::Server;
 
 #[derive(Default)]
-pub struct UserServer;
+pub struct UserServer {}
 
 #[tonic::async_trait]
 impl UserService for UserServer {
