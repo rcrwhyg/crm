@@ -17,16 +17,15 @@ pub struct AuthConfig {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ServerConfig {
     pub port: u16,
-    pub db_url: String,
 }
 
 impl AppConfig {
     pub fn try_load() -> Result<Self> {
         // read from ./notify.yml, or /etc/config/notify.yml, or from env NOTIFY_CONFIG
         let ret = match (
-            File::open("user_stat.yml"),
-            File::open("/etc/config/user_stat.yml"),
-            env::var("USER_STAT_CONFIG"),
+            File::open("metadata.yml"),
+            File::open("/etc/config/metadata.yml"),
+            env::var("METADATA_CONFIG"),
         ) {
             (Ok(reader), _, _) => serde_yaml::from_reader(reader),
             (_, Ok(reader), _) => serde_yaml::from_reader(reader),
