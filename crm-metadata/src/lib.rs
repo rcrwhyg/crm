@@ -5,9 +5,10 @@ use pb::{
     metadata_server::{Metadata, MetadataServer},
     Content, MaterializeRequest,
 };
-
-pub use config::AppConfig;
 use tonic::{async_trait, Request, Response, Status, Streaming};
+
+pub use abi::Tpl;
+pub use config::AppConfig;
 
 mod abi;
 mod config;

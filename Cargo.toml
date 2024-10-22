@@ -5,10 +5,17 @@ resolver = "2"
 [workspace.dependencies]
 anyhow = "1.0.90"
 chrono = { version = "0.4.38", features = ["serde"] }
+crm-metadata = { path = "crm-metadata" }
+crm-send = { path = "crm-send" }
+derive_builder = "0.20.2"
 fake = { version = "2.10.0", features = ["derive", "chrono"] }
+futures = "0.3.31"
+itertools = "0.13.0"
 prost = "0.13.3"
 prost-build = "0.13.3"
 prost-types = "0.13.3"
+proto-builder-trait = "0.6.2"
+rand = "0.8.5"
 serde = { version = "1.0.210", features = ["derive"] }
 serde_yaml = "0.9.34"
 sqlx = { version = "0.8.2", features = [
@@ -23,3 +30,4 @@ tonic = { version = "0.12.3", features = ["zstd", "tls"] }
 tonic-build = "0.12.3"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+user-stat = { path = "user-stat" }

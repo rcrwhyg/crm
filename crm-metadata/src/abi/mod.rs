@@ -1,10 +1,12 @@
+use std::collections::HashSet;
+
 use chrono::{DateTime, Days, Utc};
 use fake::{
     faker::{chrono::en::DateTimeBetween, lorem::en::Sentence, name::raw::Name},
     locales::EN,
     Fake, Faker,
 };
-use futures::{Stream, StreamExt as _};
+use futures::{stream, Stream, StreamExt as _};
 use prost_types::Timestamp;
 use rand::Rng as _;
 use tokio::sync::mpsc;
@@ -62,20 +64,20 @@ impl Content {
     }
 }
 
-// pub struct Tpl<'a>(pub &'a [Content]);
+pub struct Tpl<'a>(pub &'a [Content]);
 
-// impl<'a> Tpl<'a> {
-//     pub fn to_body(&self) -> String {
-//         format!("Tpl: {:?}", self.0)
-//     }
-// }
+impl<'a> Tpl<'a> {
+    pub fn to_body(&self) -> String {
+        format!("Tpl: {:?}", self.0)
+    }
+}
 
-// impl MaterializeRequest {
-//     pub fn new_with_ids(ids: &[u32]) -> impl Stream<Item = Self> {
-//         let reqs: HashSet<_> = ids.iter().map(|id| Self { id: *id }).collect();
-//         stream::iter(reqs)
-//     }
-// }
+impl MaterializeRequest {
+    pub fn new_with_ids(ids: &[u32]) -> impl Stream<Item = Self> {
+        let reqs: HashSet<_> = ids.iter().map(|id| Self { id: *id }).collect();
+        stream::iter(reqs)
+    }
+}
 
 impl Publisher {
     pub fn new() -> Self {

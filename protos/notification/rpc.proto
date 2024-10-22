@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package notification;
+
+import "notification/messages.proto";
+
+// The Notification service definition, which provides a way to send
+// notifications to users.
+service Notification {
+  // Sends a notification to a user.
+  rpc Send(stream SendRequest) returns (stream SendResponse) {}
+}

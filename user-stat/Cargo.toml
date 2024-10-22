@@ -4,18 +4,23 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 
+[features]
+default = []
+test_utils = ["sqlx-db-tester"]
+
 [dependencies]
 anyhow = { workspace = true }
 chrono = { workspace = true }
-derive_builder = "0.20.2"
-fake = { workspace = true }
-futures = "0.3.31"
-itertools = "0.13.0"
+derive_builder = { workspace = true }
+futures = { workspace = true }
+itertools = { workspace = true }
 prost = { workspace = true }
 prost-types = { workspace = true }
+rand = { workspace = true }
 serde = { workspace = true }
 serde_yaml = { workspace = true }
 sqlx = { workspace = true }
+sqlx-db-tester = { version = "0.5.0", optional = true }
 tokio = { workspace = true }
 tonic = { workspace = true }
 tracing = { workspace = true }
@@ -23,9 +28,10 @@ tracing-subscriber = { workspace = true }
 
 [build-dependencies]
 anyhow = { workspace = true }
-proto-builder-trait = "0.6.2"
+proto-builder-trait = { workspace = true }
 tonic-build = { workspace = true }
 
 [dev-dependencies]
+fake = { version = "2.10.0", features = ["derive", "chrono"] }
 nanoid = "0.4.0"
-rand = "0.8.5"
+user-stat = { workspace = true, features = ["test_utils"] }

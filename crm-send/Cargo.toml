@@ -4,25 +4,36 @@ version = "0.1.0"
 edition = "2021"
 license = "MIT"
 
+[features]
+default = []
+test_utils = ["fake", "nanoid"]
+
 [dependencies]
 anyhow = { workspace = true }
 chrono = { workspace = true }
-derive_builder = "0.20.2"
-fake = { workspace = true }
-futures = "0.3.31"
-itertools = "0.13.0"
+crm-metadata = { workspace = true }
+derive_builder = { workspace = true }
+fake = { version = "2.10.0", features = ["derive", "chrono"], optional = true }
+futures = { workspace = true }
+itertools = { workspace = true }
+nanoid = { version = "0.4.0", optional = true }
 prost = { workspace = true }
 prost-types = { workspace = true }
-rand = "0.8.5"
+rand = { workspace = true }
 serde = { workspace = true }
 serde_yaml = { workspace = true }
 sqlx = { workspace = true }
 tokio = { workspace = true }
+tokio-stream = { workspace = true }
 tonic = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+uuid = { version = "1.11.0", features = ["v4"] }
 
 [build-dependencies]
 anyhow = { workspace = true }
-proto-builder-trait = "0.6.2"
+proto-builder-trait = { workspace = true }
 tonic-build = { workspace = true }
+
+[dev-dependencies]
+crm-send = { workspace = true, features = ["test_utils"] }
