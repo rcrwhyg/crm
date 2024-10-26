@@ -21,7 +21,6 @@ pub struct ServerConfig {
 
 impl AppConfig {
     pub fn try_load() -> Result<Self> {
-        // read from ./notify.yml, or /etc/config/notify.yml, or from env NOTIFY_CONFIG
         let ret = match (
             File::open("metadata.yml"),
             File::open("/etc/config/metadata.yml"),

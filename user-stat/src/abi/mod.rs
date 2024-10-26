@@ -1,37 +1,19 @@
-use chrono::{DateTime, TimeZone, Utc};
-use futures::stream;
-use itertools::Itertools as _;
-use prost_types::Timestamp;
-use tonic::{Response, Status};
-
+use crate::pb::{QueryRequestBuilder, TimeQuery};
 use crate::{
     pb::{QueryRequest, RawQueryRequest, User},
     ResponseStream, ServiceResult, UserStatsService,
 };
+use chrono::{DateTime, TimeZone, Utc};
+use futures::stream;
+use itertools::Itertools as _;
+use prost_types::Timestamp;
+use std::fmt;
+use tonic::{Response, Status};
+use tracing::info;
 
 impl UserStatsService {
     pub async fn query(&self, query: QueryRequest) -> ServiceResult<ResponseStream> {
-        // generate sql based on query
-        let mut sql = "SELECT email, name FROM user_stats WHERE ".to_string();
-
-        let time_conditions = query
-            .timestamps
-            .into_iter()
-            .map(|(k, v)| timestamp_query(&k, v.lower, v.upper))
-            .join(" AND ");
-
-        sql.push_str(&time_conditions);
-
-        let id_conditions = query
-            .ids
-            .into_iter()
-            .map(|(k, v)| ids_query(&k, v.ids))
-            .join(" AND ");
-
-        sql.push_str(" AND ");
-        sql.push_str(&id_conditions);
-
-        println!("Generated SQL: {}", sql);
+        let sql = query.to_string();
 
         self.raw_query(RawQueryRequest { query: sql }).await
     }
@@ -39,7 +21,7 @@ impl UserStatsService {
     pub async fn raw_query(&self, req: RawQueryRequest) -> ServiceResult<ResponseStream> {
         // TODO: query must only return email and name, so we should use sql parser to parse the query
         let Ok(ret) = sqlx::query_as::<_, User>(&req.query)
-            .fetch_all(&self.pool)
+            .fetch_all(&self.inner.pool)
             .await
         else {
             return Err(Status::internal(format!(
@@ -54,7 +36,59 @@ impl UserStatsService {
     }
 }
 
-fn ids_query(name: &str, ids: Vec<u32>) -> String {
+impl fmt::Display for QueryRequest {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // generate sql based on query
+        let mut sql = "SELECT email, name FROM user_stats WHERE ".to_string();
+
+        let time_conditions = self
+            .timestamps
+            .iter()
+            .map(|(k, v)| timestamp_query(k, v.lower.as_ref(), v.upper.as_ref()))
+            .join(" AND ");
+
+        sql.push_str(&time_conditions);
+
+        let id_conditions = self
+            .ids
+            .iter()
+            .map(|(k, v)| ids_query(k, &v.ids))
+            .join(" AND ");
+
+        if !id_conditions.is_empty() {
+            sql.push_str(" AND ");
+            sql.push_str(&id_conditions);
+        }
+
+        info!("Generated SQL: {}", sql);
+
+        write!(f, "{}", sql)
+    }
+}
+
+impl QueryRequest {
+    pub fn new_with_dt(name: &str, lower: DateTime<Utc>, upper: DateTime<Utc>) -> Self {
+        let ts = Timestamp {
+            seconds: lower.timestamp(),
+            nanos: 0,
+        };
+        let ts1 = Timestamp {
+            seconds: upper.timestamp(),
+            nanos: 0,
+        };
+        let tq = TimeQuery {
+            lower: Some(ts),
+            upper: Some(ts1),
+        };
+
+        QueryRequestBuilder::default()
+            .timestamp((name.to_string(), tq))
+            .build()
+            .expect("Failed to build query request")
+    }
+}
+
+fn ids_query(name: &str, ids: &[u32]) -> String {
     if ids.is_empty() {
         return "TRUE".to_string();
     }
@@ -62,7 +96,7 @@ fn ids_query(name: &str, ids: Vec<u32>) -> String {
     format!("array{:?} <@ {}", ids, name)
 }
 
-fn timestamp_query(name: &str, lower: Option<Timestamp>, upper: Option<Timestamp>) -> String {
+fn timestamp_query(name: &str, lower: Option<&Timestamp>, upper: Option<&Timestamp>) -> String {
     if lower.is_none() && upper.is_none() {
         return "TRUE".to_string();
     }
@@ -85,27 +119,34 @@ fn timestamp_query(name: &str, lower: Option<Timestamp>, upper: Option<Timestamp
     )
 }
 
-fn ts_to_utc(ts: Timestamp) -> DateTime<Utc> {
+fn ts_to_utc(ts: &Timestamp) -> DateTime<Utc> {
     Utc.timestamp_opt(ts.seconds, ts.nanos as _).unwrap()
 }
 
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
-    use chrono::Duration;
     use stream::StreamExt as _;
 
-    use crate::{
-        pb::{IdQuery, QueryRequestBuilder, TimeQuery},
-        AppConfig,
-    };
-
     use super::*;
+    use crate::pb::QueryRequestBuilder;
+    use crate::test_utils::{id, tq};
+
+    #[test]
+    fn query_request_to_string_should_work() {
+        let d1 = Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap();
+        let d2 = Utc.with_ymd_and_hms(2024, 1, 2, 0, 0, 0).unwrap();
+        let query = QueryRequest::new_with_dt("created_at", d1, d2);
+        let sql = query.to_string();
+        assert_eq!(
+            sql,
+            "SELECT email, name FROM user_stats WHERE created_at BETWEEN '2024-01-01T00:00:00+00:00' AND '2024-01-02T00:00:00+00:00'"
+        );
+    }
 
     #[tokio::test]
     async fn test_raw_query_should_work() -> Result<()> {
-        let config = AppConfig::try_load().expect("Failed to load config");
-        let svc = UserStatsService::new(config).await;
+        let (_tdb, svc) = UserStatsService::new_for_test().await?;
         let mut stream = svc
             .raw_query(RawQueryRequest {
                 query: "select * from user_stats where created_at > '2024-05-01' limit 5"
@@ -123,15 +164,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_query_should_work() -> Result<()> {
-        let config = AppConfig::try_load().expect("Failed to load config");
-        let svc = UserStatsService::new(config).await;
+        let (_tdb, svc) = UserStatsService::new_for_test().await?;
         let query = QueryRequestBuilder::default()
-            // .timestamp(("created_at".to_string(), tq(Some(30), None)))
-            .timestamp(("last_visited_at".to_string(), tq(Some(1), None)))
-            // .id(("recent_watched".to_string(), id(&[296273, 299163, 271297])))
+            .timestamp(("created_at".to_string(), tq(Some(120), None)))
+            .timestamp(("last_visited_at".to_string(), tq(Some(30), None)))
             .id(("viewed_but_not_started".to_string(), id(&[402193])))
-            .build()
-            .unwrap();
+            .build()?;
         let mut stream = svc.query(query).await?.into_inner();
 
         while let Some(user) = stream.next().await {
@@ -139,24 +177,5 @@ mod tests {
         }
 
         Ok(())
-    }
-
-    fn id(id: &[u32]) -> IdQuery {
-        IdQuery { ids: id.to_vec() }
-    }
-
-    fn tq(lower: Option<i64>, upper: Option<i64>) -> TimeQuery {
-        TimeQuery {
-            lower: lower.map(to_ts),
-            upper: upper.map(to_ts),
-        }
-    }
-
-    fn to_ts(days: i64) -> Timestamp {
-        let dt = Utc::now().checked_sub_signed(Duration::days(days)).unwrap();
-        Timestamp {
-            seconds: dt.timestamp(),
-            nanos: dt.timestamp_subsec_nanos() as i32,
-        }
     }
 }
