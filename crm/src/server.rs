@@ -1,46 +1,39 @@
+use std::mem;
+
 use anyhow::Result;
-use crm::pb::{
-    user_service_server::{UserService, UserServiceServer},
-    CreateUserRequest, GetUserRequest, User,
-};
-use tonic::transport::Server;
-
-#[derive(Default)]
-pub struct UserServer {}
-
-#[tonic::async_trait]
-impl UserService for UserServer {
-    async fn create_user(
-        &self,
-        request: tonic::Request<CreateUserRequest>,
-    ) -> Result<tonic::Response<User>, tonic::Status> {
-        let input = request.into_inner();
-        println!("create_user: {:?}", input);
-        let user = User::new(1, &input.name, &input.email);
-        Ok(tonic::Response::new(user))
-    }
-
-    async fn get_user(
-        &self,
-        request: tonic::Request<GetUserRequest>,
-    ) -> Result<tonic::Response<User>, tonic::Status> {
-        let input = request.into_inner();
-        println!("get_user: {:?}", input);
-        Ok(tonic::Response::new(User::default()))
-    }
-}
+use crm::{AppConfig, CrmService};
+use tonic::transport::{Identity, Server, ServerTlsConfig};
+use tracing::info;
+use tracing::level_filters::LevelFilter;
+use tracing_subscriber::fmt::Layer;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
+use tracing_subscriber::Layer as _;
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let addr = "[::1]:50051".parse().unwrap();
-    let svc = UserServer {};
+    let layer = Layer::new().with_filter(LevelFilter::INFO);
+    tracing_subscriber::registry().with(layer).init();
 
-    println!("UserService listening on {}", addr);
+    let mut config = AppConfig::try_load().expect("Failed to load config");
 
-    Server::builder()
-        .add_service(UserServiceServer::new(svc))
-        .serve(addr)
-        .await?;
+    let tls = mem::take(&mut config.server.tls);
+
+    let port = &config.server.port;
+    let addr = format!("[::1]:{port}").parse()?;
+    info!("CRM service listening on {}", addr);
+    let svc = CrmService::try_new(config).await?.into_server()?;
+
+    if let Some(tls) = tls {
+        let identity = Identity::from_pem(tls.cert, tls.key);
+        Server::builder()
+            .tls_config(ServerTlsConfig::new().identity(identity))?
+            .add_service(svc)
+            .serve(addr)
+            .await?;
+    } else {
+        Server::builder().add_service(svc).serve(addr).await?;
+    }
 
     Ok(())
 }
