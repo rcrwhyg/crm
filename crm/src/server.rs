@@ -25,6 +25,7 @@ async fn main() -> Result<()> {
     let svc = CrmService::try_new(config).await?.into_server()?;
 
     if let Some(tls) = tls {
+        info!("TLS enabled");
         let identity = Identity::from_pem(tls.cert, tls.key);
         Server::builder()
             .tls_config(ServerTlsConfig::new().identity(identity))?

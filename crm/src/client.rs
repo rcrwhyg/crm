@@ -11,7 +11,7 @@ async fn main() -> Result<()> {
     let pem = include_str!("../../fixtures/rootCA.pem");
     let tls = ClientTlsConfig::new()
         .ca_certificate(Certificate::from_pem(pem))
-        .domain_name("localhost");
+        .domain_name("www.project.cloud");
     let channel = Channel::from_static("https://[::1]:50000")
         .tls_config(tls)?
         .connect()

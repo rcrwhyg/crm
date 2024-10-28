@@ -1,18 +1,69 @@
 server:
   port: 50000
   sender_email: crm@acme.org
-  user_stats: http://localhost:50001
-  metadata: http://localhost:50002
-  notification: http://localhost:50003
+  user_stats: http://[::1]:50001
+  metadata: http://[::1]:50002
+  notification: http://[::1]:50003
   tls:
     cert: |
       -----BEGIN CERTIFICATE-----
+      MIIEUDCCArigAwIBAgIRAJIdw+vHuEvMYF4/VFsroWowDQYJKoZIhvcNAQELBQAw
+      ZTEeMBwGA1UEChMVbWtjZXJ0IGRldmVsb3BtZW50IENBMR0wGwYDVQQLDBRyb290
+      QExBUFRPUC1SNzRCOTVVMDEkMCIGA1UEAwwbbWtjZXJ0IHJvb3RATEFQVE9QLVI3
+      NEI5NVUwMB4XDTI0MTAyODA5MjIzOFoXDTI3MDEyODA5MjIzOFowSDEnMCUGA1UE
+      ChMebWtjZXJ0IGRldmVsb3BtZW50IGNlcnRpZmljYXRlMR0wGwYDVQQLDBRyb290
+      QExBUFRPUC1SNzRCOTVVMDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEB
+      AMCOYc6Kco2zval2j/ndKNZNm5kO4i5h2jnGLFmVDe0GAl3Zc9sgJsHykMfX1vXG
+      gOanGQfV4ZMIHqYdhSjyP2vIAcQGuSysL6CPRPCLKMpOYPPXCM9pEypoPZH622Ee
+      p+VEZCS54a6/0Dztc0DqIgHO9WZqGBPXAyXZAKXLaECvtGPuN0YBZl5GycJtOWlC
+      PyreFQLVRCk2K4H4OPlMus90iSHMvRBp+4CPsY5+Frn0V1MwZEuMAKU1NpyOy7Ox
+      PbV0a4T0eVJT83CfuZ7Tz3F+3Fv5Jl4UP8lJjrzicmGSQbW8BV4BiFwLMdVgoPO8
+      pIvvLxxm7/tp+JiTEpYkvBUCAwEAAaOBlzCBlDAOBgNVHQ8BAf8EBAMCBaAwEwYD
+      VR0lBAwwCgYIKwYBBQUHAwEwHwYDVR0jBBgwFoAU5QyXuoC91oMexzFvrrqs8O/y
+      BfcwTAYDVR0RBEUwQ4INcHJvamVjdC5jbG91ZIIPKi5wcm9qZWN0LmNsb3Vkggls
+      b2NhbGhvc3SHBH8AAAGHEAAAAAAAAAAAAAAAAAAAAAEwDQYJKoZIhvcNAQELBQAD
+      ggGBACL2FOAzVn5HFIcVJt9frKgauOQgOSmV/Nkp3p3OBX8PlAwdYvLNtbbFauo6
+      msie0/SesDHorlUDzIprWzXidSJJaDRz8aciMJRjeIyqf+cgrEWVRp6A7l7oVIoM
+      yGne2BAuAnYNxytTfzamygbg3ZDoRZWNJ7a4ABnPmKTjpiX/kDAsxJTvZMs58LX7
+      HgaIiCr6jpcwZGfK9qVieBEiXD+FOjen6JmzaMc4xN9EfEMyA1SpQ2tCGZ/rvty6
+      8XILD0NcNTgftz+xyxfVP8i9WJIHTIP7FYr5U18F13BiZ9hyCHW3TAcWDXBLBdrt
+      1kYPza8bCu1TDcrpW6NCU2nfR7DqdV1y2eEhhz6gxPzcCBgsMzDqjv5eNmeIAd5c
+      RP/o0BEWO5nBnODGojcirtWdJbaIZiMqo9Q1Da0iDkG9A20EO/zj4ao00o261ago
+      TJHmaN6rHgaLsNqw2c20QSVsT6lRpUrj10OzMDUckOkHY1eBy2m+hVkPwycfGTaV
+      a9J0xA==
       -----END CERTIFICATE-----
     key: |
       -----BEGIN PRIVATE KEY-----
+      MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDAjmHOinKNs72p
+      do/53SjWTZuZDuIuYdo5xixZlQ3tBgJd2XPbICbB8pDH19b1xoDmpxkH1eGTCB6m
+      HYUo8j9ryAHEBrksrC+gj0TwiyjKTmDz1wjPaRMqaD2R+tthHqflRGQkueGuv9A8
+      7XNA6iIBzvVmahgT1wMl2QCly2hAr7Rj7jdGAWZeRsnCbTlpQj8q3hUC1UQpNiuB
+      +Dj5TLrPdIkhzL0QafuAj7GOfha59FdTMGRLjAClNTacjsuzsT21dGuE9HlSU/Nw
+      n7me089xftxb+SZeFD/JSY684nJhkkG1vAVeAYhcCzHVYKDzvKSL7y8cZu/7afiY
+      kxKWJLwVAgMBAAECggEAIJG0r2exepBVWy2Hqr6ioqTb1aaz0R6R98WySLCye03R
+      5qfaNc0ZYSKzJGo4nLeno9vNmwqtLd5ouLYziLp4ybU5vztX5Nt27tRs17bh/l4F
+      fhj4D4T5Ten1yBRDOQkjYt8PhTq/lnwxL60GGou/lsi3r0vwqKJskOFEf8aI6q/C
+      WHVGUlaCMp++nJxEgaPXxDTfV60Ugr3DARIHlxeoWmmiw3bPQYXZdTZ3UU5uS6pO
+      ymblxWOoYVWHqbdGNTq5+MN1Zj2oXwBYLanuuvuPPumoDxLL82ckjxAWNOZuCDs+
+      HAoOesNMERViWtnAabjGlf4IwnHcUOqE90plqPP9AQKBgQDhcwM+wsBnDRPmeKbk
+      gk+c+L1DrhSjfifUdwQdneEgBIXCx3jIx4eyErup99cKj5LFB8Qaaz5cxlh1PpDO
+      zMhK5jfZleRndfHyjMjYOqYvSH3/0mpEgLxCsmz2mfHCQjzCfBoEo7bV+79iixqE
+      NhuZfgPJJt2LLqbRnFNo7JOH1QKBgQDapkkzUdYJD1XS88wr+zGCiE0feCtXiGKd
+      7EiX8qizqeKTtG219/t1xMG/9I9FBXxTwxTlVxcer6L5Of1X0AB//x/Kc9SWf8gH
+      oiI0cLYzKtppAMBB3Ocazo/MswijZ8BSvTJyDjLMU0ic0t/Am1RoxrqJWgFrklZt
+      W6SKJ1jDQQKBgQCNhrrRykYoKuCEPNdf+aHqw4dklkJkhAyS5wfRY8vwYoZpyPi8
+      6ez4T6Q5RdlbytdzErX7c7lZWjYrm9QhzhIqWq1SzTLt8++nuNNYUjEC27olPzzw
+      tfP41rNqdyd6MESePnPC19cuK3Rwcyx5NNJMn/vWaayH9AhK65y88E6I5QKBgQCE
+      h75e6P+/RhhTYYskLYH5CP0WUhSTXgvIhWwLDf7Lx/GabgcCAWneHIEEBQzCXWza
+      qKiFyqAs7XDveALjsyRacR2n7UWyY4mvdssc1iTaJuN0OgxO38MFMKdhADQAN+cP
+      P7bQA2MvDlw5EmilqoEjcTGoB3JM7cqNRrsZMnhPAQKBgQDTxiEiYDGy6SvHYE68
+      SicQBoQ5+aar8F6gweCWR8kJYj08Zpp4Zg45DQuoY+FaqB7pu8oUhk9twzH7bQbm
+      37yLIhGNzs2B/V1N8z2PRMPnJLvbSVMBwviukEX5X8Cuz8wAPDmVKr5QS97/0sYJ
+      75VcN/p1PBQ51CHrFPHU6w3qWg==
       -----END PRIVATE KEY-----
 
 auth:
   pk: |
     -----BEGIN PUBLIC KEY-----
+    MCowBQYDK2VwAyEARUeoqS5E3CD4NGYaNct5uWJrd8Np+46vG07/3WAV0Lw=
     -----END PUBLIC KEY-----
