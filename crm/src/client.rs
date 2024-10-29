@@ -11,14 +11,14 @@ async fn main() -> Result<()> {
     let pem = include_str!("../../fixtures/rootCA.pem");
     let tls = ClientTlsConfig::new()
         .ca_certificate(Certificate::from_pem(pem))
-        .domain_name("www.project.cloud");
+        .domain_name("project.cloud");
     let channel = Channel::from_static("https://[::1]:50000")
         .tls_config(tls)?
         .connect()
         .await?;
 
     let token = include_str!("../../fixtures/token").trim();
-    let token: MetadataValue<_> = format!("Bearer {}", token).parse()?;
+    let token: MetadataValue<_> = format!("Bearer {token}").parse()?;
 
     let mut client = CrmClient::with_interceptor(channel, move |mut req: Request<()>| {
         req.metadata_mut().insert("authorization", token.clone());
